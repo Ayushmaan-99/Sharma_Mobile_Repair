@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Sharma Mobile Repair</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-body">
+    <!-- Login Page -->
+    <div id="loginPage" class="login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <i class="fas fa-shield-alt"></i>
+                <h1>Admin Login</h1>
+                <p>Sharma Mobile Repair</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-large">
+                    <span class="btn-text">Login</span>
+                    <span class="btn-loader" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> Logging in...
+                    </span>
+                </button>
+                <div id="loginMessage" class="form-message"></div>
+            </form>
+            <div class="login-footer">
+                <a href="index.html"><i class="fas fa-arrow-left"></i> Back to Website</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="admin-dashboard" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Sharma Mobile Repair</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item" data-section="accessories">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Manage Accessories</span>
+                </a>
+                <a href="#" class="nav-item" data-section="requests">
+                    <i class="fas fa-tools"></i>
+                    <span>Repair Requests</span>
+                </a>
+                <a href="#" class="nav-item" data-section="recycle-bin">
+                    <i class="fas fa-trash-restore"></i>
+                    <span>Recycle Bin</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Mobile Menu Toggle -->
+            <button class="admin-mobile-toggle" id="adminMobileToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <header class="admin-header">
+                <h1 id="sectionTitle">Analytics Dashboard</h1>
+                <div class="admin-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="adminUsername">Admin</span>
+                </div>
+            </header>
+
+            <!-- Analytics Section -->
+            <section id="analyticsSection" class="admin-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalRequests">0</h3>
+                            <p>Total Repair Requests</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalAccessories">0</h3>
+                            <p>Total Accessories</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="pendingRequests">0</h3>
+                            <p>Pending Requests</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="completedRequests">0</h3>
+                            <p>Completed Requests</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h2>Recent Repair Requests</h2>
+                    <div id="recentRequests" class="data-table-container">
+                        <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Accessories Management Section -->
+            <section id="accessoriesSection" class="admin-section" style="display: none;">
+                <div class="section-actions">
+                    <button class="btn btn-primary" id="addAccessoryBtn">
+                        <i class="fas fa-plus"></i> Add New Accessory
+                    </button>
+                </div>
+
+                <div id="accessoriesTable" class="data-table-container">
+                    <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading accessories...</p>
+                </div>
+
+                <!-- Add/Edit Accessory Modal -->
+                <div id="accessoryModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 id="modalTitle">Add New Accessory</h2>
+                            <button class="modal-close" id="closeModal">&times;</button>
+                        </div>
+                        <form id="accessoryForm" enctype="multipart/form-data">
+                            <input type="hidden" id="accessoryId" name="id">
+                            <div class="form-group">
+                                <label for="accessoryName">Name *</label>
+                                <input type="text" id="accessoryName" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="accessoryPrice">Price (₹) *</label>
+                                <input type="number" id="accessoryPrice" name="price" min="0" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="accessoryDescription">Description *</label>
+                                <textarea id="accessoryDescription" name="description" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="accessoryAvailable">Availability</label>
+                                <select id="accessoryAvailable" name="available">
+                                    <option value="true">Available</option>
+                                    <option value="false">Out of Stock</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="accessoryImage">Image *</label>
+                                <input type="file" id="accessoryImage" name="image" accept="image/*">
+                                <small>Current image will be replaced if you upload a new one</small>
+                                <div id="currentImage" style="margin-top: 10px;"></div>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-text">Save Accessory</span>
+                                    <span class="btn-loader" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin"></i> Saving...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                        <div id="modalMessage" class="form-message"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Repair Requests Section -->
+            <section id="requestsSection" class="admin-section" style="display: none;">
+                <div class="section-filters">
+                    <select id="statusFilter" class="filter-select">
+                        <option value="all">All Requests</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+
+                <div id="requestsTable" class="data-table-container">
+                    <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading requests...</p>
+                </div>
+
+                <!-- Request Details Modal -->
+                <div id="requestModal" class="modal">
+                    <div class="modal-content modal-large">
+                        <div class="modal-header">
+                            <h2>Repair Request Details</h2>
+                            <button class="modal-close" id="closeRequestModal">&times;</button>
+                        </div>
+                        <div id="requestDetails" class="request-details">
+                            <!-- Details will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recycle Bin Section -->
+            <section id="recycleBinSection" class="admin-section" style="display: none;">
+                <div class="section-actions">
+                    <button class="btn btn-primary" id="emptyRecycleBinBtn">
+                        <i class="fas fa-trash-alt"></i> Empty Recycle Bin
+                    </button>
+                </div>
+
+                <div class="recycle-bin-info">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Deleted requests will be permanently removed after <strong>15 days</strong>. You can restore them before that.</p>
+                </div>
+
+                <div id="recycleBinTable" class="data-table-container">
+                    <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading recycle bin...</p>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settingsSection" class="admin-section" style="display: none;">
+                <div class="settings-container">
+                    <!-- Change Username Card -->
+                    <div class="settings-card">
+                        <div class="settings-header">
+                            <i class="fas fa-user-edit"></i>
+                            <div>
+                                <h2>Change Username</h2>
+                                <p>Update your admin account username</p>
+                            </div>
+                        </div>
+                        <form id="changeUsernameForm" class="settings-form">
+                            <div class="form-group">
+                                <label for="currentUsernamePassword">Current Password *</label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" id="currentUsernamePassword" name="currentPassword" required autocomplete="current-password">
+                                    <button type="button" class="toggle-password" data-target="currentUsernamePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small>Enter your password to verify it's you</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="newUsername">New Username *</label>
+                                <input type="text" id="newUsername" name="newUsername" required minlength="3" autocomplete="username">
+                                <small>Username must be at least 3 characters long</small>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-text">
+                                        <i class="fas fa-save"></i> Update Username
+                                    </span>
+                                    <span class="btn-loader" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin"></i> Updating...
+                                    </span>
+                                </button>
+                            </div>
+                            <div id="usernameMessage" class="form-message"></div>
+                        </form>
+                    </div>
+
+                    <!-- Change Password Card -->
+                    <div class="settings-card">
+                        <div class="settings-header">
+                            <i class="fas fa-key"></i>
+                            <div>
+                                <h2>Change Password</h2>
+                                <p>Update your admin account password</p>
+                            </div>
+                        </div>
+                        <form id="changePasswordForm" class="settings-form">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password *</label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" id="currentPassword" name="currentPassword" required autocomplete="current-password">
+                                    <button type="button" class="toggle-password" data-target="currentPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password *</label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" id="newPassword" name="newPassword" required minlength="6" autocomplete="new-password">
+                                    <button type="button" class="toggle-password" data-target="newPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small>Password must be at least 6 characters long</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm New Password *</label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6" autocomplete="new-password">
+                                    <button type="button" class="toggle-password" data-target="confirmPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-text">
+                                        <i class="fas fa-save"></i> Update Password
+                                    </span>
+                                    <span class="btn-loader" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin"></i> Updating...
+                                    </span>
+                                </button>
+                            </div>
+                            <div id="passwordMessage" class="form-message"></div>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="settings-header">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <h2>Account Information</h2>
+                                <p>Your admin account details</p>
+                            </div>
+                        </div>
+                        <div class="account-info">
+                            <div class="info-item">
+                                <span class="info-label">Username:</span>
+                                <span class="info-value" id="settingsUsername">admin</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Role:</span>
+                                <span class="info-value">Administrator</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Last Login:</span>
+                                <span class="info-value" id="lastLogin">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card security-tips">
+                        <div class="settings-header">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <h2>Security Tips</h2>
+                                <p>Keep your account secure</p>
+                            </div>
+                        </div>
+                        <ul class="tips-list">
+                            <li><i class="fas fa-check-circle"></i> Use a strong password with letters, numbers, and symbols</li>
+                            <li><i class="fas fa-check-circle"></i> Change your password regularly</li>
+                            <li><i class="fas fa-check-circle"></i> Never share your credentials with anyone</li>
+                            <li><i class="fas fa-check-circle"></i> Always logout when finished</li>
+                            <li><i class="fas fa-check-circle"></i> Use different passwords for different accounts</li>
+                            <li><i class="fas fa-check-circle"></i> Choose a unique username that's easy to remember</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
