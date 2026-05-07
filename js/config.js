@@ -7,7 +7,7 @@
 
 const CONFIG = {
     // API Base URL - Replace with your actual backend URL
-    API_BASE_URL: 'https://sharma-mobile-repair-api.onrender.com/api',
+    API_BASE_URL: 'https://sharma-mobile-repair-v2-1.onrender.com/api',
     
     // API Endpoints
     ENDPOINTS: {
