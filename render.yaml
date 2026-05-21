@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: sharma-mobile-repair
+    runtime: node
+    autoDeploy: true
+    buildCommand: cd backend && npm ci
+    startCommand: cd backend && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
