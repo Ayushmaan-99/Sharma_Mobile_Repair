@@ -79,6 +79,14 @@ function validateFile(file) {
     return { valid: true };
 }
 
+function formatPrice(price) {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+    }).format(Number(price) || 0);
+}
+
 // ===================================
 // Navigation
 // ===================================
@@ -179,8 +187,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 }
                 
-                selectedFiles.push(file);
-                displayImagePreview(file);
+                const fileEntry = {
+                    id: `${file.name}-${file.size}-${file.lastModified}`,
+                    file
+                };
+
+                selectedFiles.push(fileEntry);
+                displayImagePreview(fileEntry);
             }
             
             // Clear the file input
@@ -214,21 +227,31 @@ document.addEventListener('DOMContentLoaded', function() {
 /**
  * Display image preview
  */
-function displayImagePreview(file) {
+function displayImagePreview(fileEntry) {
     const imagePreview = document.getElementById('imagePreview');
     if (!imagePreview) return;
+
+    const { id, file } = fileEntry;
     
     const reader = new FileReader();
     
     reader.onload = function(e) {
         const previewItem = document.createElement('div');
         previewItem.className = 'preview-item';
-        previewItem.innerHTML = `
-            <img src="${e.target.result}" alt="Preview">
-            <button type="button" class="preview-remove" onclick="removeImage('${file.name}')">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
+
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.alt = `Preview of ${file.name}`;
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'preview-remove';
+        removeButton.setAttribute('aria-label', `Remove ${file.name}`);
+        removeButton.innerHTML = '<i class="fas fa-times" aria-hidden="true"></i>';
+        removeButton.addEventListener('click', () => removeImage(id));
+
+        previewItem.appendChild(img);
+        previewItem.appendChild(removeButton);
         imagePreview.appendChild(previewItem);
     };
     
@@ -238,14 +261,14 @@ function displayImagePreview(file) {
 /**
  * Remove image from preview
  */
-function removeImage(fileName) {
-    selectedFiles = selectedFiles.filter(file => file.name !== fileName);
+function removeImage(fileId) {
+    selectedFiles = selectedFiles.filter(fileEntry => fileEntry.id !== fileId);
     
     // Re-render preview
     const imagePreview = document.getElementById('imagePreview');
     if (imagePreview) {
         imagePreview.innerHTML = '';
-        selectedFiles.forEach(file => displayImagePreview(file));
+        selectedFiles.forEach(fileEntry => displayImagePreview(fileEntry));
     }
 }
 
@@ -278,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Add selected images to form data
-            selectedFiles.forEach((file, index) => {
+            selectedFiles.forEach(({ file }) => {
                 formData.append('images', file);
             });
             
@@ -370,18 +393,42 @@ function createAccessoryCard(accessory) {
     
     const statusClass = accessory.available ? 'status-available' : 'status-unavailable';
     const statusText = accessory.available ? 'Available' : 'Out of Stock';
-    
-    card.innerHTML = `
-        <img src="${accessory.image}" alt="${accessory.name}" class="accessory-image" loading="lazy">
-        <div class="accessory-content">
-            <h3 class="accessory-name">${accessory.name}</h3>
-            <p class="accessory-description">${accessory.description}</p>
-            <div class="accessory-footer">
-                <span class="accessory-price">₹${accessory.price}</span>
-                <span class="accessory-status ${statusClass}">${statusText}</span>
-            </div>
-        </div>
-    `;
+
+    const image = document.createElement('img');
+    image.src = accessory.image;
+    image.alt = accessory.name || 'Mobile accessory';
+    image.className = 'accessory-image';
+    image.loading = 'lazy';
+
+    const content = document.createElement('div');
+    content.className = 'accessory-content';
+
+    const name = document.createElement('h3');
+    name.className = 'accessory-name';
+    name.textContent = accessory.name;
+
+    const description = document.createElement('p');
+    description.className = 'accessory-description';
+    description.textContent = accessory.description;
+
+    const footer = document.createElement('div');
+    footer.className = 'accessory-footer';
+
+    const price = document.createElement('span');
+    price.className = 'accessory-price';
+    price.textContent = formatPrice(accessory.price);
+
+    const status = document.createElement('span');
+    status.className = `accessory-status ${statusClass}`;
+    status.textContent = statusText;
+
+    footer.appendChild(price);
+    footer.appendChild(status);
+    content.appendChild(name);
+    content.appendChild(description);
+    content.appendChild(footer);
+    card.appendChild(image);
+    card.appendChild(content);
     
     return card;
 }

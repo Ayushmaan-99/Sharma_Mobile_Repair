@@ -11,10 +11,8 @@ async function setupAdmin() {
     try {
         console.log('🔄 Connecting to MongoDB...');
         
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sharma-mobile-repair', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sharma-mobile-repair');
+        await mongoose.connection.syncIndexes();
         
         console.log('✅ Connected to MongoDB');
         

@@ -2,18 +2,20 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const mongoose = require('mongoose');
 const RepairRequest = require('../models/RepairRequest');
 const auth = require('../middleware/auth');
+const {
+    ensureUploadSubdir,
+    buildStoredUploadPath,
+    toPublicUrl,
+    deleteUpload
+} = require('../utils/fileStorage');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = 'uploads/repairs';
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
+        cb(null, ensureUploadSubdir('repairs'));
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -37,13 +39,25 @@ const upload = multer({
     }
 });
 
+router.param('id', (req, res, next, id) => {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid repair request id' });
+    }
+
+    next();
+});
+
 /**
  * POST /api/repair-requests
  * Submit a repair request (public)
  */
 router.post('/', upload.array('images', 5), async (req, res) => {
     try {
-        const { customerName, phone, email, deviceModel, issueDescription } = req.body;
+        const customerName = String(req.body.customerName || '').trim();
+        const phone = String(req.body.phone || '').trim();
+        const email = String(req.body.email || '').trim().toLowerCase();
+        const deviceModel = String(req.body.deviceModel || '').trim();
+        const issueDescription = String(req.body.issueDescription || '').trim();
         
         // Validate required fields
         if (!customerName || !phone || !deviceModel || !issueDescription) {
@@ -56,9 +70,15 @@ router.post('/', upload.array('images', 5), async (req, res) => {
         if (!/^[0-9]{10}$/.test(phone)) {
             return res.status(400).json({ error: 'Invalid phone number. Must be 10 digits.' });
         }
+
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ error: 'Invalid email address' });
+        }
         
         // Get uploaded image paths
-        const imagePaths = req.files ? req.files.map(file => file.path) : [];
+        const imagePaths = req.files
+            ? req.files.map(file => buildStoredUploadPath('repairs', file.filename))
+            : [];
         
         // Create repair request
         const repairRequest = new RepairRequest({
@@ -106,7 +126,7 @@ router.get('/', auth, async (req, res) => {
             email: request.email,
             deviceModel: request.deviceModel,
             issueDescription: request.issueDescription,
-            images: request.images.map(img => `${req.protocol}://${req.get('host')}/${img}`),
+            images: request.images.map(img => toPublicUrl(req, img)),
             status: request.status,
             createdAt: request.createdAt
         }));
@@ -143,7 +163,7 @@ router.get('/recycle-bin/all', auth, async (req, res) => {
                 email: request.email,
                 deviceModel: request.deviceModel,
                 issueDescription: request.issueDescription,
-                images: request.images.map(img => `${req.protocol}://${req.get('host')}/${img}`),
+                images: request.images.map(img => toPublicUrl(req, img)),
                 status: request.status,
                 createdAt: request.createdAt,
                 deletedAt: request.deletedAt,
@@ -177,7 +197,7 @@ router.get('/:id', auth, async (req, res) => {
             email: request.email,
             deviceModel: request.deviceModel,
             issueDescription: request.issueDescription,
-            images: request.images.map(img => `${req.protocol}://${req.get('host')}/${img}`),
+            images: request.images.map(img => toPublicUrl(req, img)),
             status: request.status,
             createdAt: request.createdAt
         });
@@ -305,11 +325,7 @@ router.delete('/:id/permanent', auth, async (req, res) => {
         }
         
         // Delete uploaded images
-        request.images.forEach(imagePath => {
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath);
-            }
-        });
+        request.images.forEach(deleteUpload);
         
         // Permanently delete from database
         await RepairRequest.findByIdAndDelete(req.params.id);
@@ -340,11 +356,7 @@ router.post('/cleanup/old', auth, async (req, res) => {
         // Delete images and requests
         for (const request of oldRequests) {
             // Delete uploaded images
-            request.images.forEach(imagePath => {
-                if (fs.existsSync(imagePath)) {
-                    fs.unlinkSync(imagePath);
-                }
-            });
+            request.images.forEach(deleteUpload);
             
             await RepairRequest.findByIdAndDelete(request._id);
             deletedCount++;

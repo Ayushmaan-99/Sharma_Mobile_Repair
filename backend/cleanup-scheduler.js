@@ -5,7 +5,7 @@
 
 const cron = require('node-cron');
 const RepairRequest = require('./models/RepairRequest');
-const fs = require('fs');
+const { deleteUpload } = require('./utils/fileStorage');
 
 /**
  * Clean up old deleted requests
@@ -28,13 +28,11 @@ async function cleanupOldRequests() {
         for (const request of oldRequests) {
             // Delete uploaded images
             request.images.forEach(imagePath => {
-                if (fs.existsSync(imagePath)) {
-                    try {
-                        fs.unlinkSync(imagePath);
-                        console.log(`Deleted image: ${imagePath}`);
-                    } catch (err) {
-                        console.error(`Failed to delete image: ${imagePath}`, err);
-                    }
+                try {
+                    deleteUpload(imagePath);
+                    console.log(`Deleted image: ${imagePath}`);
+                } catch (err) {
+                    console.error(`Failed to delete image: ${imagePath}`, err);
                 }
             });
             

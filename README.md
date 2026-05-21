@@ -1,366 +1,230 @@
-# 📱 Sharma Mobile Repair Website
+# Sharma Mobile Repair
 
-A modern, responsive website for a mobile repair business with customer repair request submission, accessories showcase, and secure admin panel.
+Responsive mobile repair website with an Express API, MongoDB database, admin panel, accessory management, repair request uploads, recycle bin, and PM2 background server support.
 
-## 🚀 READY TO DEPLOY TO THE INTERNET?
+## Features
 
-**→ Start here: [START_DEPLOYMENT_HERE.md](START_DEPLOYMENT_HERE.md)**
+- Public responsive website for phones, tablets, laptops, and desktops
+- Repair booking form with optional image uploads
+- Accessories catalog loaded from the backend
+- Admin login with JWT authentication
+- Admin dashboard for analytics, accessories, repair requests, recycle bin, and settings
+- MongoDB persistence with validation and indexes
+- Soft delete and restore flow for repair requests
+- Automatic cleanup scheduler for old deleted requests
+- PM2 process config for long-running local server
 
-Your website can be **LIVE** on the internet in just **30 minutes** for **FREE**! ✅
+## Project Structure
 
-### Quick Deployment Links:
-- 📖 [Complete Deployment Guide](DEPLOY_TO_INTERNET.md) - Step-by-step instructions
-- ⚡ [Quick Checklist](QUICK_DEPLOY_CHECKLIST.md) - Fast reference
-- 🗺️ [Visual Flowchart](DEPLOYMENT_FLOWCHART.md) - Visual guide
-- 🔄 [Platform Comparison](DEPLOYMENT_ALTERNATIVES.md) - Choose your platform
-- 📊 [Deployment Summary](DEPLOYMENT_SUMMARY.txt) - Overview
-
----
-
-## 🌟 Features
-
-### Customer Features
-- **Responsive Design**: Mobile-first design that works on all devices
-- **Services Showcase**: Display of all repair services offered
-- **Repair Request Form**: Submit repair requests with device details
-- **Image Upload**: Upload multiple photos of damaged devices
-- **Accessories Browse**: View available mobile accessories with prices
-- **Contact Information**: WhatsApp integration, Google Maps, contact details
-- **FAQ Section**: Common questions and answers
-- **Testimonials**: Customer reviews and ratings
-
-### Admin Features
-- **Secure Login**: Username/password authentication
-- **Analytics Dashboard**: View statistics and recent requests
-- **Accessories Management**: Add, edit, delete accessories with images
-- **Repair Requests**: View all customer requests with uploaded images
-- **Image Download**: Download customer-uploaded device images
-- **Status Management**: Mark requests as pending or completed
-- **Real-time Updates**: Dynamic data loading from backend
-
-## 🛠️ Tech Stack
-
-### Frontend
-- HTML5
-- CSS3 (Modern, responsive design)
-- Vanilla JavaScript (ES6+)
-- Font Awesome Icons
-
-### Backend (Required)
-- Node.js + Express.js (recommended) OR PHP
-- MySQL or MongoDB database
-- File upload handling (Multer for Node.js)
-
-## 📁 Project Structure
-
-```
-sharma-mobile-repair/
-├── index.html              # Homepage
-├── admin.html              # Admin panel
+```text
+.
+├── index.html
+├── admin.html
 ├── css/
-│   ├── styles.css          # Main stylesheet
-│   └── admin.css           # Admin panel styles
+│   ├── styles.css
+│   └── admin.css
 ├── js/
-│   ├── config.js           # Configuration file
-│   ├── main.js             # Main JavaScript
-│   └── admin.js            # Admin panel JavaScript
-└── README.md               # This file
+│   ├── config.js
+│   ├── main.js
+│   └── admin.js
+├── backend/
+│   ├── server.js
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   ├── utils/
+│   └── .env
+├── ecosystem.config.cjs
+├── start-server-pm2.bat
+└── stop-server-pm2.bat
 ```
 
-## 🚀 Setup Instructions
+## Requirements
 
-### 1. Frontend Setup
+- Node.js
+- npm
+- MongoDB Atlas or local MongoDB
+- PM2 for always-running local server
 
-1. **Clone or download** this repository
-2. **Configure API endpoints** in `js/config.js`:
-   ```javascript
-   const CONFIG = {
-       API_BASE_URL: 'http://your-backend-url/api',
-       // ... other settings
-   };
-   ```
+Install PM2 once if needed:
 
-3. **Open in browser**:
-   - Open `index.html` for the main website
-   - Open `admin.html` for the admin panel
-
-### 2. Backend Setup (Node.js + Express)
-
-#### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB or MySQL database
-
-#### Installation
-
-1. **Create backend directory**:
-   ```bash
-   mkdir backend
-   cd backend
-   npm init -y
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install express mongoose multer bcryptjs jsonwebtoken cors dotenv
-   ```
-
-3. **Create backend structure**:
-   ```
-   backend/
-   ├── server.js
-   ├── models/
-   │   ├── Accessory.js
-   │   ├── RepairRequest.js
-   │   └── Admin.js
-   ├── routes/
-   │   ├── accessories.js
-   │   ├── repairRequests.js
-   │   └── admin.js
-   ├── middleware/
-   │   └── auth.js
-   ├── uploads/
-   │   ├── accessories/
-   │   └── repairs/
-   └── .env
-   ```
-
-4. **Configure environment variables** (`.env`):
-   ```
-   PORT=3000
-   MONGODB_URI=mongodb://localhost:27017/sharma-mobile-repair
-   JWT_SECRET=your_jwt_secret_key_here
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD=your_secure_password
-   ```
-
-5. **Start the server**:
-   ```bash
-   node server.js
-   ```
-
-### 3. Database Setup
-
-#### MongoDB Schema
-
-**Accessories Collection**:
-```javascript
-{
-    name: String,
-    description: String,
-    price: Number,
-    image: String,
-    available: Boolean,
-    createdAt: Date
-}
+```bash
+npm install -g pm2
 ```
 
-**Repair Requests Collection**:
-```javascript
-{
-    customerName: String,
-    phone: String,
-    email: String,
-    deviceModel: String,
-    issueDescription: String,
-    images: [String],
-    status: String, // 'pending' or 'completed'
-    createdAt: Date
-}
+## Environment
+
+Create or update `backend/.env`:
+
+```env
+PORT=3000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=use_a_long_random_secret
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=use_a_strong_password
 ```
 
-**Admin Collection**:
-```javascript
-{
-    username: String,
-    password: String, // hashed
-    createdAt: Date
-}
+Do not commit real secrets. Keep production credentials private.
+
+## Install
+
+Install root test dependencies:
+
+```bash
+npm install
 ```
 
-### 4. API Endpoints
+Install backend dependencies:
 
-#### Public Endpoints
-
-**GET /api/accessories**
-- Get all accessories
-- Response: Array of accessory objects
-
-**POST /api/repair-requests**
-- Submit a repair request
-- Body: FormData with customer details and images
-- Response: Created request object
-
-#### Protected Endpoints (Require Authentication)
-
-**POST /api/admin/login**
-- Admin login
-- Body: `{ username, password }`
-- Response: `{ token, username }`
-
-**GET /api/repair-requests** (Admin only)
-- Get all repair requests
-- Headers: `Authorization: Bearer <token>`
-- Response: Array of request objects
-
-**POST /api/accessories** (Admin only)
-- Add new accessory
-- Body: FormData with accessory details and image
-- Headers: `Authorization: Bearer <token>`
-
-**PUT /api/accessories/:id** (Admin only)
-- Update accessory
-- Body: FormData with updated details
-- Headers: `Authorization: Bearer <token>`
-
-**DELETE /api/accessories/:id** (Admin only)
-- Delete accessory
-- Headers: `Authorization: Bearer <token>`
-
-**PATCH /api/repair-requests/:id** (Admin only)
-- Update request status
-- Body: `{ status: 'pending' | 'completed' }`
-- Headers: `Authorization: Bearer <token>`
-
-## 🔒 Security Features
-
-- **Input Validation**: All form inputs are validated
-- **File Upload Validation**: Only images allowed, max 5MB per file
-- **XSS Protection**: Input sanitization
-- **Authentication**: JWT-based admin authentication
-- **Password Hashing**: Bcrypt for password security
-- **CORS Configuration**: Proper CORS setup
-- **Environment Variables**: Sensitive data in .env file
-
-## 📱 Responsive Breakpoints
-
-- **Mobile**: 320px - 767px
-- **Tablet**: 768px - 1023px
-- **Desktop**: 1024px and above
-
-## 🎨 Color Scheme
-
-- **Primary**: Deep Navy Blue (#1e3a8a)
-- **Secondary**: Electric Cyan (#06b6d4)
-- **Accent**: Orange (#f97316)
-- **Success**: Green (#10b981)
-- **Error**: Red (#ef4444)
-
-## 🌐 Deployment
-
-### Frontend Deployment (Cloudflare Pages)
-
-1. **Push to GitHub**:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git push origin main
-   ```
-
-2. **Deploy to Cloudflare Pages**:
-   - Go to Cloudflare Pages dashboard
-   - Connect your GitHub repository
-   - Set build command: (none for static site)
-   - Set build output directory: `/`
-   - Deploy
-
-### Backend Deployment (Heroku/Railway/Render)
-
-1. **Create Procfile**:
-   ```
-   web: node server.js
-   ```
-
-2. **Deploy to hosting platform**:
-   - Connect repository
-   - Set environment variables
-   - Deploy
-
-### Database Deployment
-
-- **MongoDB Atlas**: Free cloud MongoDB hosting
-- **MySQL**: Use managed MySQL service (AWS RDS, DigitalOcean)
-
-## 🔧 Configuration
-
-### Update API Base URL
-
-In `js/config.js`, update the API base URL:
-
-```javascript
-const CONFIG = {
-    API_BASE_URL: 'https://your-backend-domain.com/api',
-    // ...
-};
+```bash
+cd backend
+npm install
 ```
 
-### Admin Credentials
+## Run Locally
 
-Default admin credentials (change in production):
-- **Username**: admin
-- **Password**: Set in backend .env file
+Start the backend and website:
 
-## 📝 Usage
+```bash
+cd backend
+npm start
+```
 
-### For Customers
+Open:
 
-1. Visit the website
-2. Browse services and accessories
-3. Fill out the repair request form
-4. Upload photos of damaged device
-5. Submit the form
-6. Wait for contact from the shop
+- Website: `http://localhost:3000`
+- Admin panel: `http://localhost:3000/admin.html`
+- API health: `http://localhost:3000/api/health`
 
-### For Admin
+## Keep Server Running
 
-1. Go to `/admin.html`
-2. Login with admin credentials
-3. View analytics dashboard
-4. Manage accessories (add/edit/delete)
-5. View repair requests
-6. Download customer images
-7. Update request status
+Start with PM2:
 
-## 🐛 Troubleshooting
+```bash
+start-server-pm2.bat
+```
 
-### Images not uploading
-- Check file size (max 5MB)
-- Check file type (only JPEG, PNG, WEBP)
-- Verify backend upload endpoint is working
+Useful PM2 commands:
 
-### Admin login not working
-- Check API endpoint configuration
-- Verify admin credentials in database
-- Check browser console for errors
+```bash
+pm2 list
+pm2 logs sharma-mobile-repair
+pm2 restart sharma-mobile-repair
+pm2 stop sharma-mobile-repair
+```
 
-### Accessories not loading
-- Verify backend API is running
-- Check CORS configuration
-- Check browser console for errors
+Stop with:
 
-## 📄 License
+```bash
+stop-server-pm2.bat
+```
 
-This project is created for Sharma Mobile Repair. All rights reserved.
+## Admin Login
 
-## 👨‍💻 Support
+Use the credentials stored in `backend/.env`:
 
-For support or questions:
-- **Email**: info@sharmamobilerepair.com
-- **Phone**: +91 98765 43210
-- **WhatsApp**: +91 98765 43210
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD`
 
-## 🚀 Future Enhancements
+If login fails after changing `.env`, sync the database admin user by running:
 
-- [ ] Online payment integration
-- [ ] SMS notifications for customers
-- [ ] Email notifications
-- [ ] Appointment booking system
-- [ ] Customer portal for tracking repairs
-- [ ] Multi-language support
-- [ ] Dark mode toggle
-- [ ] Progressive Web App (PWA)
-- [ ] Real-time chat support
+```bash
+cd backend
+node update-admin.js
+```
 
----
+Then restart PM2:
 
-**Built with ❤️ for Sharma Mobile Repair**
+```bash
+pm2 restart sharma-mobile-repair
+```
+
+## API Overview
+
+Base URL:
+
+```text
+http://localhost:3000/api
+```
+
+Main endpoints:
+
+- `GET /health`
+- `POST /admin/login`
+- `POST /admin/change-password`
+- `POST /admin/change-username`
+- `GET /accessories`
+- `POST /accessories`
+- `PUT /accessories/:id`
+- `DELETE /accessories/:id`
+- `POST /repair-requests`
+- `GET /repair-requests`
+- `PATCH /repair-requests/:id`
+- `DELETE /repair-requests/:id`
+- `GET /repair-requests/recycle-bin/all`
+- `POST /repair-requests/:id/restore`
+- `DELETE /repair-requests/:id/permanent`
+
+Admin-only endpoints require:
+
+```text
+Authorization: Bearer <token>
+```
+
+## Testing
+
+Run frontend service tests:
+
+```bash
+npm test
+```
+
+Check backend JavaScript syntax:
+
+```bash
+node --check backend/server.js
+node --check backend/routes/admin.js
+node --check backend/routes/accessories.js
+node --check backend/routes/repairRequests.js
+```
+
+## Responsive Design
+
+The public website and admin panel include responsive layouts for:
+
+- Small phones
+- Large phones
+- Tablets
+- Small laptops
+- Desktop screens
+
+Admin tables become readable labeled cards on phone screens, so repair requests and accessories remain usable without horizontal scrolling.
+
+## Troubleshooting
+
+If admin login fails:
+
+1. Confirm `backend/.env` has `JWT_SECRET`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD`.
+2. Sync the admin user with `node backend/update-admin.js`.
+3. Restart the server or PM2.
+4. Check logs with `pm2 logs sharma-mobile-repair`.
+
+If MongoDB fails:
+
+1. Check `MONGODB_URI`.
+2. Confirm your MongoDB Atlas IP whitelist.
+3. Check `http://localhost:3000/api/health`.
+
+If the website loads but API calls fail:
+
+1. Confirm the backend is running on port `3000`.
+2. Check `js/config.js`.
+3. Open `http://localhost:3000/api/health`.
+
+## Deployment Notes
+
+- Backend can deploy to Render or any Node.js host.
+- Frontend can be served by the same Express server or deployed separately.
+- Set production environment variables on the hosting platform.
+- Use a strong `JWT_SECRET`.
+- Never expose `.env` contents publicly.

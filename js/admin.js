@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Store authentication
                 localStorage.setItem('adminToken', result.token);
                 localStorage.setItem('adminUsername', username);
+                localStorage.setItem('lastLogin', new Date().toISOString());
                 
                 isAuthenticated = true;
                 currentUser = username;
@@ -262,11 +263,11 @@ function displayRecentRequests(requests) {
         <tbody>
             ${requests.map(request => `
                 <tr>
-                    <td>${request.customerName}</td>
-                    <td>${request.phone}</td>
-                    <td>${request.deviceModel}</td>
-                    <td><span class="status-badge status-${request.status}">${request.status}</span></td>
-                    <td>${formatDate(request.createdAt)}</td>
+                    <td data-label="Customer">${escapeHtml(request.customerName)}</td>
+                    <td data-label="Phone">${escapeHtml(request.phone)}</td>
+                    <td data-label="Device">${escapeHtml(request.deviceModel)}</td>
+                    <td data-label="Status"><span class="status-badge status-${escapeAttribute(request.status)}">${escapeHtml(request.status)}</span></td>
+                    <td data-label="Date">${formatDate(request.createdAt)}</td>
                 </tr>
             `).join('')}
         </tbody>
@@ -329,11 +330,11 @@ function displayAccessories(items) {
         <tbody>
             ${items.map(item => `
                 <tr>
-                    <td><img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
-                    <td>${item.name}</td>
-                    <td>₹${item.price}</td>
-                    <td><span class="status-badge ${item.available ? 'status-completed' : 'status-pending'}">${item.available ? 'Available' : 'Out of Stock'}</span></td>
-                    <td class="table-actions">
+                    <td data-label="Image"><img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.name)}" class="table-thumb"></td>
+                    <td data-label="Name">${escapeHtml(item.name)}</td>
+                    <td data-label="Price">${formatPrice(item.price)}</td>
+                    <td data-label="Status"><span class="status-badge ${item.available ? 'status-completed' : 'status-pending'}">${item.available ? 'Available' : 'Out of Stock'}</span></td>
+                    <td data-label="Actions" class="table-actions">
                         <button class="btn-icon btn-edit" onclick="editAccessory('${item.id}')" title="Edit">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -388,7 +389,7 @@ function openAccessoryModal(accessoryId = null) {
             
             // Show current image
             document.getElementById('currentImage').innerHTML = `
-                <img src="${accessory.image}" alt="Current" style="max-width: 200px; border-radius: 8px;">
+                <img src="${escapeAttribute(accessory.image)}" alt="Current accessory image" class="current-accessory-image">
             `;
             
             // Make image optional for edit
@@ -569,13 +570,13 @@ function displayRepairRequests(requests) {
         <tbody>
             ${requests.map(request => `
                 <tr>
-                    <td>${request.customerName}</td>
-                    <td>${request.phone}</td>
-                    <td>${request.deviceModel}</td>
-                    <td>${truncateText(request.issueDescription, 50)}</td>
-                    <td><span class="status-badge status-${request.status}">${request.status}</span></td>
-                    <td>${formatDate(request.createdAt)}</td>
-                    <td class="table-actions">
+                    <td data-label="Customer">${escapeHtml(request.customerName)}</td>
+                    <td data-label="Phone">${escapeHtml(request.phone)}</td>
+                    <td data-label="Device">${escapeHtml(request.deviceModel)}</td>
+                    <td data-label="Issue">${escapeHtml(truncateText(request.issueDescription, 50))}</td>
+                    <td data-label="Status"><span class="status-badge status-${escapeAttribute(request.status)}">${escapeHtml(request.status)}</span></td>
+                    <td data-label="Date">${formatDate(request.createdAt)}</td>
+                    <td data-label="Actions" class="table-actions">
                         <button class="btn-icon btn-view" onclick="viewRequest('${request.id}')" title="View Details">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -606,24 +607,24 @@ function viewRequest(id) {
         <div class="detail-grid">
             <div class="detail-item">
                 <div class="detail-label">Customer Name</div>
-                <div class="detail-value">${request.customerName}</div>
+                <div class="detail-value">${escapeHtml(request.customerName)}</div>
             </div>
             <div class="detail-item">
                 <div class="detail-label">Phone Number</div>
-                <div class="detail-value">${request.phone}</div>
+                <div class="detail-value">${escapeHtml(request.phone)}</div>
             </div>
             <div class="detail-item">
                 <div class="detail-label">Email</div>
-                <div class="detail-value">${request.email || 'Not provided'}</div>
+                <div class="detail-value">${escapeHtml(request.email || 'Not provided')}</div>
             </div>
             <div class="detail-item">
                 <div class="detail-label">Device Model</div>
-                <div class="detail-value">${request.deviceModel}</div>
+                <div class="detail-value">${escapeHtml(request.deviceModel)}</div>
             </div>
             <div class="detail-item">
                 <div class="detail-label">Status</div>
                 <div class="detail-value">
-                    <span class="status-badge status-${request.status}">${request.status}</span>
+                    <span class="status-badge status-${escapeAttribute(request.status)}">${escapeHtml(request.status)}</span>
                 </div>
             </div>
             <div class="detail-item">
@@ -634,7 +635,7 @@ function viewRequest(id) {
         
         <div class="detail-item" style="margin-bottom: 1.5rem;">
             <div class="detail-label">Issue Description</div>
-            <div class="detail-value">${request.issueDescription}</div>
+            <div class="detail-value">${escapeHtml(request.issueDescription)}</div>
         </div>
         
         ${request.images && request.images.length > 0 ? `
@@ -643,8 +644,8 @@ function viewRequest(id) {
                 <div class="images-grid">
                     ${request.images.map((image, index) => `
                         <div class="image-item">
-                            <img src="${image}" alt="Device image ${index + 1}">
-                            <button class="image-download" onclick="downloadImage('${image}', '${request.customerName}_${index + 1}')" title="Download">
+                            <img src="${escapeAttribute(image)}" alt="Device image ${index + 1}">
+                            <button class="image-download" onclick="downloadImage('${escapeAttribute(escapeJsString(image))}', '${escapeAttribute(escapeJsString(request.customerName))}_${index + 1}')" title="Download">
                                 <i class="fas fa-download"></i>
                             </button>
                         </div>
@@ -745,6 +746,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function formatDate(dateString) {
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return '-';
+
     return date.toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'short',
@@ -755,8 +758,38 @@ function formatDate(dateString) {
 }
 
 function truncateText(text, maxLength) {
+    text = String(text || '');
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
+}
+
+function escapeAttribute(value) {
+    return escapeHtml(value).replace(/`/g, '&#96;');
+}
+
+function escapeJsString(value) {
+    return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r?\n/g, ' ');
+}
+
+function formatPrice(price) {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+    }).format(Number(price) || 0);
 }
 
 function showButtonLoading(button) {
@@ -847,8 +880,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Validate password length
-            if (newPassword.length < 6) {
-                showMessage('passwordMessage', 'Password must be at least 6 characters long!', 'error');
+            if (newPassword.length < 8) {
+                showMessage('passwordMessage', 'Password must be at least 8 characters long!', 'error');
                 return;
             }
             
@@ -871,7 +904,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(result.message || 'Failed to change password');
+                    throw new Error(result.error || 'Failed to change password');
                 }
                 
                 showMessage('passwordMessage', 'Password changed successfully!', 'success');
@@ -936,7 +969,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(result.message || 'Failed to change username');
+                    throw new Error(result.error || 'Failed to change username');
                 }
                 
                 showMessage('usernameMessage', 'Username changed successfully!', 'success');
@@ -1027,17 +1060,17 @@ function displayRecycleBin(requests) {
         <tbody>
             ${requests.map(request => `
                 <tr>
-                    <td>${request.customerName}</td>
-                    <td>${request.phone}</td>
-                    <td>${request.deviceModel}</td>
-                    <td>${formatDate(request.deletedAt)}</td>
-                    <td>
+                    <td data-label="Customer">${escapeHtml(request.customerName)}</td>
+                    <td data-label="Phone">${escapeHtml(request.phone)}</td>
+                    <td data-label="Device">${escapeHtml(request.deviceModel)}</td>
+                    <td data-label="Deleted">${formatDate(request.deletedAt)}</td>
+                    <td data-label="Days Left">
                         <span class="days-remaining">
                             <i class="fas fa-clock"></i>
                             ${request.daysRemaining} ${request.daysRemaining === 1 ? 'day' : 'days'}
                         </span>
                     </td>
-                    <td class="table-actions">
+                    <td data-label="Actions" class="table-actions">
                         <button class="btn-icon btn-edit" onclick="restoreRequest('${request.id}')" title="Restore">
                             <i class="fas fa-undo"></i>
                         </button>

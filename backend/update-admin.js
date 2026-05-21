@@ -31,7 +31,8 @@ async function updateAdmin() {
 
         // Connect to MongoDB
         console.log('Connecting to MongoDB...');
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sharma-mobile-repair');
+        await mongoose.connection.syncIndexes();
         console.log('✓ Connected to MongoDB\n');
 
         // Get current admin
@@ -47,12 +48,12 @@ async function updateAdmin() {
 
         // Ask for new credentials
         const newUsername = await question('Enter new username (or press Enter to keep current): ');
-        const newPassword = await question('Enter new password (minimum 6 characters): ');
+        const newPassword = await question('Enter new password (minimum 8 characters): ');
         const confirmPassword = await question('Confirm new password: ');
 
         // Validate password
-        if (!newPassword || newPassword.length < 6) {
-            console.log('\n❌ Password must be at least 6 characters long!');
+        if (!newPassword || newPassword.length < 8) {
+            console.log('\nPassword must be at least 8 characters long!');
             process.exit(1);
         }
 

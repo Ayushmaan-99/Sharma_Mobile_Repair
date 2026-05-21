@@ -4,7 +4,9 @@ const repairRequestSchema = new mongoose.Schema({
     customerName: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        minlength: 2,
+        maxlength: 100
     },
     phone: {
         type: String,
@@ -14,16 +16,20 @@ const repairRequestSchema = new mongoose.Schema({
     email: {
         type: String,
         trim: true,
-        lowercase: true
+        lowercase: true,
+        match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     },
     deviceModel: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        maxlength: 120
     },
     issueDescription: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        maxlength: 2000
     },
     images: [{
         type: String
@@ -46,5 +52,9 @@ const repairRequestSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
+repairRequestSchema.index({ isDeleted: 1, createdAt: -1 });
+repairRequestSchema.index({ isDeleted: 1, deletedAt: 1 });
+repairRequestSchema.index({ status: 1, createdAt: -1 });
 
 module.exports = mongoose.model('RepairRequest', repairRequestSchema);

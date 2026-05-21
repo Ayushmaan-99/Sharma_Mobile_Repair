@@ -1,22 +1,17 @@
 @echo off
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                                                              ║
-echo ║         Sharma Mobile Repair - Stop Server (PM2)            ║
-echo ║                                                              ║
-echo ╚══════════════════════════════════════════════════════════════╝
-echo.
+setlocal
 
-cd backend
+set "PM2_CMD=pm2"
+where pm2 >nul 2>&1
+if errorlevel 1 set "PM2_CMD=%APPDATA%\npm\pm2.cmd"
 
-echo Stopping server...
-pm2 stop sharma-mobile-repair
-pm2 save
+if not exist "%PM2_CMD%" if "%PM2_CMD%" neq "pm2" (
+    echo PM2 is not installed.
+    exit /b 1
+)
 
-echo.
-echo ✓ Server stopped successfully!
-echo.
-pm2 list
-echo.
-echo To start again: Double-click start-server-pm2.bat
-echo.
-pause
+"%PM2_CMD%" stop sharma-mobile-repair
+"%PM2_CMD%" save
+"%PM2_CMD%" list
+
+endlocal

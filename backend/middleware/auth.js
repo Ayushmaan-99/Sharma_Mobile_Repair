@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { getJwtSecret } = require('../utils/authConfig');
 
 const auth = (req, res, next) => {
     try {
@@ -10,7 +11,7 @@ const auth = (req, res, next) => {
         }
         
         // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
+        const decoded = jwt.verify(token, getJwtSecret());
         req.admin = decoded;
         next();
     } catch (error) {

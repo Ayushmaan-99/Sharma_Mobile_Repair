@@ -2,18 +2,20 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const mongoose = require('mongoose');
 const Accessory = require('../models/Accessory');
 const auth = require('../middleware/auth');
+const {
+    ensureUploadSubdir,
+    buildStoredUploadPath,
+    toPublicUrl,
+    deleteUpload
+} = require('../utils/fileStorage');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = 'uploads/accessories';
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
+        cb(null, ensureUploadSubdir('accessories'));
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -37,6 +39,14 @@ const upload = multer({
     }
 });
 
+router.param('id', (req, res, next, id) => {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid accessory id' });
+    }
+
+    next();
+});
+
 /**
  * GET /api/accessories
  * Get all accessories (public)
@@ -51,7 +61,7 @@ router.get('/', async (req, res) => {
             name: accessory.name,
             description: accessory.description,
             price: accessory.price,
-            image: `${req.protocol}://${req.get('host')}/${accessory.image}`,
+            image: toPublicUrl(req, accessory.image),
             available: accessory.available,
             createdAt: accessory.createdAt
         }));
@@ -69,10 +79,13 @@ router.get('/', async (req, res) => {
  */
 router.post('/', auth, upload.single('image'), async (req, res) => {
     try {
-        const { name, description, price, available } = req.body;
+        const name = String(req.body.name || '').trim();
+        const description = String(req.body.description || '').trim();
+        const price = Number(req.body.price);
+        const { available } = req.body;
         
         // Validate input
-        if (!name || !description || !price) {
+        if (!name || !description || !Number.isFinite(price) || price < 0) {
             return res.status(400).json({ error: 'Name, description, and price are required' });
         }
         
@@ -84,8 +97,8 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
         const accessory = new Accessory({
             name,
             description,
-            price: parseFloat(price),
-            image: req.file.path,
+            price,
+            image: buildStoredUploadPath('accessories', req.file.filename),
             available: available === 'true' || available === true
         });
         
@@ -98,7 +111,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
                 name: accessory.name,
                 description: accessory.description,
                 price: accessory.price,
-                image: `${req.protocol}://${req.get('host')}/${accessory.image}`,
+                image: toPublicUrl(req, accessory.image),
                 available: accessory.available
             }
         });
@@ -114,7 +127,10 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
  */
 router.put('/:id', auth, upload.single('image'), async (req, res) => {
     try {
-        const { name, description, price, available } = req.body;
+        const name = req.body.name ? String(req.body.name).trim() : '';
+        const description = req.body.description ? String(req.body.description).trim() : '';
+        const price = req.body.price !== undefined ? Number(req.body.price) : undefined;
+        const { available } = req.body;
         
         const accessory = await Accessory.findById(req.params.id);
         
@@ -125,16 +141,19 @@ router.put('/:id', auth, upload.single('image'), async (req, res) => {
         // Update fields
         if (name) accessory.name = name;
         if (description) accessory.description = description;
-        if (price) accessory.price = parseFloat(price);
+        if (price !== undefined) {
+            if (!Number.isFinite(price) || price < 0) {
+                return res.status(400).json({ error: 'Price must be a valid non-negative number' });
+            }
+            accessory.price = price;
+        }
         if (available !== undefined) accessory.available = available === 'true' || available === true;
         
         // Update image if new one is uploaded
         if (req.file) {
             // Delete old image
-            if (fs.existsSync(accessory.image)) {
-                fs.unlinkSync(accessory.image);
-            }
-            accessory.image = req.file.path;
+            deleteUpload(accessory.image);
+            accessory.image = buildStoredUploadPath('accessories', req.file.filename);
         }
         
         await accessory.save();
@@ -146,7 +165,7 @@ router.put('/:id', auth, upload.single('image'), async (req, res) => {
                 name: accessory.name,
                 description: accessory.description,
                 price: accessory.price,
-                image: `${req.protocol}://${req.get('host')}/${accessory.image}`,
+                image: toPublicUrl(req, accessory.image),
                 available: accessory.available
             }
         });
@@ -169,9 +188,7 @@ router.delete('/:id', auth, async (req, res) => {
         }
         
         // Delete image file
-        if (fs.existsSync(accessory.image)) {
-            fs.unlinkSync(accessory.image);
-        }
+        deleteUpload(accessory.image);
         
         await Accessory.findByIdAndDelete(req.params.id);
         

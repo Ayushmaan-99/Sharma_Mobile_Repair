@@ -1,53 +1,34 @@
 @echo off
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                                                              ║
-echo ║         Sharma Mobile Repair - Start Server with PM2        ║
-echo ║                                                              ║
-echo ╚══════════════════════════════════════════════════════════════╝
-echo.
+setlocal
 
-cd backend
+cd /d "%~dp0"
 
-echo Checking if server is already running...
-pm2 describe sharma-mobile-repair >nul 2>&1
+set "PM2_CMD=pm2"
+where pm2 >nul 2>&1
+if errorlevel 1 set "PM2_CMD=%APPDATA%\npm\pm2.cmd"
 
-if %errorlevel% equ 0 (
-    echo.
-    echo ✓ Server is already running!
-    echo.
-    pm2 list
-    echo.
-    echo Server Status: ONLINE
-    echo.
-    echo To view logs: pm2 logs sharma-mobile-repair
-    echo To stop: pm2 stop sharma-mobile-repair
-    echo To restart: pm2 restart sharma-mobile-repair
-) else (
-    echo.
-    echo Starting server with PM2...
-    pm2 start server.js --name sharma-mobile-repair
-    pm2 save
-    echo.
-    echo ✓ Server started successfully!
-    echo.
-    pm2 list
-    echo.
-    echo Server is now running in the background!
-    echo It will auto-restart if it crashes.
-    echo.
-    echo Useful commands:
-    echo   pm2 list                      - View all processes
-    echo   pm2 logs sharma-mobile-repair - View logs
-    echo   pm2 stop sharma-mobile-repair - Stop server
-    echo   pm2 restart sharma-mobile-repair - Restart server
+if not exist "%PM2_CMD%" if "%PM2_CMD%" neq "pm2" (
+    echo PM2 is not installed.
+    echo Install it once with: npm install -g pm2
+    exit /b 1
 )
 
+echo Starting Sharma Mobile Repair with PM2...
+"%PM2_CMD%" start ecosystem.config.cjs --only sharma-mobile-repair
+if errorlevel 1 exit /b 1
+
+"%PM2_CMD%" save
+"%PM2_CMD%" list
+
 echo.
-echo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo Server is managed by PM2 and will auto-restart if it crashes.
+echo Website: http://localhost:3000
+echo Admin:   http://localhost:3000/admin.html
+echo API:     http://localhost:3000/api
 echo.
-echo Your server is running at: http://localhost:3000
-echo Admin panel: http://localhost:3000/admin.html
-echo.
-echo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-echo.
-pause
+echo Useful commands:
+echo   pm2 logs sharma-mobile-repair
+echo   pm2 restart sharma-mobile-repair
+echo   pm2 stop sharma-mobile-repair
+
+endlocal

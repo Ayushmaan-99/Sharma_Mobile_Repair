@@ -6,8 +6,26 @@
  */
 
 const CONFIG = {
-    // API Base URL - Replace with your actual backend URL
-    API_BASE_URL: 'https://sharma-mobile-repair-v2-1.onrender.com/api',
+    // API Base URL. Override with window.SHARMA_API_BASE_URL before this file loads if needed.
+    API_BASE_URL: (() => {
+        if (window.SHARMA_API_BASE_URL) {
+            return window.SHARMA_API_BASE_URL.replace(/\/$/, '');
+        }
+
+        if (window.location.protocol === 'file:') {
+            return 'http://localhost:3000/api';
+        }
+
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return `${window.location.protocol}//${window.location.hostname}:3000/api`;
+        }
+
+        if (window.location.hostname.endsWith('onrender.com')) {
+            return `${window.location.origin}/api`;
+        }
+
+        return 'https://sharma-mobile-repair-v2-1.onrender.com/api';
+    })(),
     
     // API Endpoints
     ENDPOINTS: {

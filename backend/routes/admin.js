@@ -1,7 +1,10 @@
+
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const auth = require('../middleware/auth');
+const { getJwtSecret } = require('../utils/authConfig');
 
 /**
  * POST /api/admin/login
@@ -9,7 +12,8 @@ const Admin = require('../models/Admin');
  */
 router.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const username = String(req.body.username || '').trim();
+        const password = String(req.body.password || '');
         
         // Validate input
         if (!username || !password) {
@@ -33,7 +37,7 @@ router.post('/login', async (req, res) => {
         // Generate JWT token
         const token = jwt.sign(
             { id: admin._id, username: admin.username },
-            process.env.JWT_SECRET || 'your_jwt_secret_key',
+            getJwtSecret(),
             { expiresIn: '24h' }
         );
         
@@ -55,7 +59,29 @@ router.post('/login', async (req, res) => {
  */
 router.post('/create', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const username = String(req.body.username || '').trim();
+        const password = String(req.body.password || '');
+
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+
+        if (username.length < 3) {
+            return res.status(400).json({ error: 'Username must be at least 3 characters long' });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+        }
+
+        const adminCount = await Admin.countDocuments();
+        const setupEnabled = process.env.ALLOW_ADMIN_CREATE === 'true';
+
+        if (adminCount > 0 && !setupEnabled) {
+            return res.status(403).json({
+                error: 'Admin creation is disabled after the first admin is created'
+            });
+        }
         
         // Check if admin already exists
         const existingAdmin = await Admin.findOne({ username });
@@ -82,19 +108,10 @@ router.post('/create', async (req, res) => {
  * POST /api/admin/change-password
  * Change admin password
  */
-router.post('/change-password', async (req, res) => {
+router.post('/change-password', auth, async (req, res) => {
     try {
-        // Get token from header
-        const token = req.headers.authorization?.split(' ')[1];
-        
-        if (!token) {
-            return res.status(401).json({ error: 'No token provided' });
-        }
-        
-        // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
-        
-        const { currentPassword, newPassword } = req.body;
+        const currentPassword = String(req.body.currentPassword || '');
+        const newPassword = String(req.body.newPassword || '');
         
         // Validate input
         if (!currentPassword || !newPassword) {
@@ -102,12 +119,12 @@ router.post('/change-password', async (req, res) => {
         }
         
         // Validate new password length
-        if (newPassword.length < 6) {
-            return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+        if (newPassword.length < 8) {
+            return res.status(400).json({ error: 'New password must be at least 8 characters long' });
         }
         
         // Find admin
-        const admin = await Admin.findById(decoded.id);
+        const admin = await Admin.findById(req.admin.id);
         
         if (!admin) {
             return res.status(404).json({ error: 'Admin not found' });
@@ -147,19 +164,10 @@ router.post('/change-password', async (req, res) => {
  * POST /api/admin/change-username
  * Change admin username
  */
-router.post('/change-username', async (req, res) => {
+router.post('/change-username', auth, async (req, res) => {
     try {
-        // Get token from header
-        const token = req.headers.authorization?.split(' ')[1];
-        
-        if (!token) {
-            return res.status(401).json({ error: 'No token provided' });
-        }
-        
-        // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
-        
-        const { currentPassword, newUsername } = req.body;
+        const currentPassword = String(req.body.currentPassword || '');
+        const newUsername = String(req.body.newUsername || '').trim();
         
         // Validate input
         if (!currentPassword || !newUsername) {
@@ -172,7 +180,7 @@ router.post('/change-username', async (req, res) => {
         }
         
         // Find admin
-        const admin = await Admin.findById(decoded.id);
+        const admin = await Admin.findById(req.admin.id);
         
         if (!admin) {
             return res.status(404).json({ error: 'Admin not found' });

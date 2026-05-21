@@ -17,7 +17,7 @@ async function migrateExistingRequests() {
 
         // Connect to MongoDB
         console.log('Connecting to MongoDB...');
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sharma-mobile-repair');
         console.log('✓ Connected to MongoDB\n');
 
         // Find all requests that don't have isDeleted field

@@ -14,6 +14,7 @@
 
 .login-page {
     min-height: 100vh;
+    min-height: 100svh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -44,6 +45,8 @@
     padding: 3.5rem;
     max-width: 450px;
     width: 100%;
+    max-height: calc(100svh - 2rem);
+    overflow-y: auto;
     position: relative;
     z-index: 1;
     border: 1px solid rgba(255, 255, 255, 0.5);
@@ -105,6 +108,7 @@
     display: grid;
     grid-template-columns: 260px 1fr;
     min-height: 100vh;
+    min-height: 100svh;
 }
 
 /* Mobile Menu Toggle - Hidden on Desktop */
@@ -125,6 +129,7 @@
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
     position: relative;
     height: 100vh;
+    height: 100svh;
     overflow-y: auto;
 }
 
@@ -221,6 +226,7 @@
     padding: 2rem;
     overflow-y: auto;
     position: relative;
+    min-width: 0;
 }
 
 .admin-header {
@@ -235,6 +241,7 @@
 .admin-header h1 {
     color: var(--primary-color);
     margin: 0;
+    overflow-wrap: anywhere;
 }
 
 .admin-user {
@@ -365,6 +372,7 @@
 
 .filter-select {
     padding: 0.75rem 1rem;
+    min-height: 44px;
     border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 1rem;
@@ -590,12 +598,15 @@
     padding: 2rem;
     box-shadow: var(--shadow-md);
     overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
     border: 1px solid var(--border-color);
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 680px;
 }
 
 .data-table thead {
@@ -620,6 +631,22 @@
     padding: 1.25rem 1rem;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-dark);
+    vertical-align: middle;
+}
+
+.table-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+
+.current-accessory-image {
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
 }
 
 .data-table tbody tr {
@@ -636,13 +663,18 @@
 }
 
 .btn-icon {
-    padding: 0.6rem;
+    width: 44px;
+    height: 44px;
+    padding: 0;
     border: none;
     background: none;
     cursor: pointer;
     font-size: 1.2rem;
     transition: var(--transition);
     border-radius: 8px;
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
 }
 
 .btn-icon:hover {
@@ -725,6 +757,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
+    overscroll-behavior: contain;
 }
 
 .modal.active {
@@ -737,6 +770,7 @@
     max-width: 600px;
     width: 100%;
     max-height: 90vh;
+    max-height: calc(100svh - 2rem);
     overflow-y: auto;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
     animation: slideUp 0.3s ease-out;
@@ -1060,14 +1094,6 @@
         font-size: 0.85rem;
     }
 
-    /* Hide less important columns on mobile */
-    .data-table th:nth-child(3),
-    .data-table td:nth-child(3),
-    .data-table th:nth-child(4),
-    .data-table td:nth-child(4) {
-        display: none;
-    }
-
     /* Modal */
     .modal {
         padding: 1rem;
@@ -1185,7 +1211,6 @@
     .tips-list li {
         font-size: 0.9rem;
     }
-}
 }
 
 /* Mobile Phones (640px and below) */
@@ -1964,6 +1989,177 @@
 
     .modal-content {
         max-height: 85vh;
+        max-height: calc(100svh - 1rem);
+    }
+}
+
+@media (max-width: 640px) {
+    .data-table-container {
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        overflow: visible;
+        padding: 0;
+    }
+
+    .data-table,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
+        display: block;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .data-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.9rem;
+    }
+
+    .data-table thead {
+        display: none;
+    }
+
+    .data-table tbody {
+        display: grid;
+        gap: 0.875rem;
+    }
+
+    .data-table tr {
+        background: var(--bg-white);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        padding: 0.25rem 0;
+    }
+
+    .data-table tbody tr:hover {
+        background: var(--bg-white);
+        transform: none;
+    }
+
+    .data-table td {
+        border-bottom: 1px solid var(--border-color);
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+        padding: 0.75rem 1rem;
+        text-align: right;
+        word-break: break-word;
+    }
+
+    .data-table td:last-child {
+        border-bottom: 0;
+    }
+
+    .data-table td::before {
+        color: var(--text-light);
+        content: attr(data-label);
+        font-weight: 700;
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+    }
+
+    .data-table td.table-actions {
+        align-items: center;
+        display: grid;
+        grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+    }
+
+    .data-table td.table-actions::after {
+        content: '';
+    }
+
+    .table-actions {
+        justify-content: flex-end;
+    }
+
+    .table-thumb {
+        justify-self: end;
+    }
+}
+
+@media (max-width: 420px) {
+    .login-page {
+        align-items: flex-start;
+        padding: 0.75rem;
+    }
+
+    .login-container {
+        border-radius: 16px;
+        padding: 1.25rem;
+    }
+
+    .admin-main {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .recent-section,
+    .settings-card {
+        padding: 1rem;
+    }
+
+    .data-table td,
+    .data-table td.table-actions {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+
+    .data-table td::before {
+        margin-bottom: -0.25rem;
+    }
+
+    .table-actions {
+        justify-content: flex-start;
+    }
+
+    .table-thumb {
+        justify-self: start;
+    }
+
+    .modal {
+        align-items: flex-start;
+        padding: 0.5rem;
+    }
+
+    .modal-content {
+        border-radius: 14px;
+        max-height: calc(100svh - 1rem);
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1180px) {
+    .data-table {
+        min-width: 620px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+@media (pointer: coarse) {
+    .nav-item,
+    .btn,
+    .btn-icon,
+    .modal-close,
+    .toggle-password {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .stat-card:hover,
+    .recent-section:hover,
+    .settings-card:hover,
+    .btn-icon:hover {
+        transform: none;
     }
 }
 
